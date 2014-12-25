@@ -18,8 +18,8 @@
     "tileheight": 32,
     "tilesets": [{
         "firstgid": 1,
-        "image": "tmw_desert_spacing.png",
-        "imageheight": 199,
+        "image": "tmw_desert_spacing1.png",
+        "imageheight": 232,
         "imagewidth": 265,
         "margin": 1,
         "name": "Desert",
