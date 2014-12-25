@@ -1,0 +1,10 @@
+@import "normalize";
+@import "settings";
+@import "foundation";
+@import "mindy";
+
+body {
+	background-color: #353535;
+	cursor: url(../cursors/arrow.cur), auto;
+	// cursor: url(../cursors/aero_arrow.cur), auto;
+}
