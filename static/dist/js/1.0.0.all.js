@@ -99763,6 +99763,7 @@ $(function() {
 
         map = game.add.tilemap('desert');
         map.addTilesetImage('Desert', 'tiles');
+        map.setCollisionByExclusion([30]);
 
         tileWidth = map.tileWidth;
         tileHeight = map.tileHeight;
@@ -99780,55 +99781,25 @@ $(function() {
         player.anchor.setTo(0.5, 0.5);
 
         game.physics.enable(player);
-
         game.camera.follow(player);
+
+        game.canvas.oncontextmenu = function(e) {
+            e.preventDefault();
+            contextMenu();
+        };
 
         cursors = game.input.keyboard.createCursorKeys();
         marker = game.add.graphics();
         marker.lineStyle(2, 0x000000, 1);
         marker.drawRect(0, 0, 32, 32);
-
-        //on mouse click moves the ball to the clicked tile
-        // game.input.onDown.add(function() {
-        //     if (isMoving) {
-        //         stopPath(player);
-        //         erasePath();
-        //     }
-
-        //     marker.x = layer.getTileX(game.input.activePointer.worldX) * 32;
-        //     marker.y = layer.getTileY(game.input.activePointer.worldY) * 32;
-
-        //     pathfinder.preparePathCalculation([0, 0], [layer.getTileX(marker.x), layer.getTileY(marker.y)]);
-        //     result = pathfinder.calculatePath();
-        //     drawPath();
-        //     isMoving = true;
-        // }, game);
     }
-
-    //draws the path by creating sprites within an array (for more convenient destroying
-    function drawPath() {
-        drawList = [];
-        for (var i = 0, l = result.length - 1; i <= l; i++) {
-            if (i < l) drawList.push(game.add.sprite(result[i].y * tileHeight, result[i].x * tileWidth, '/pathPoint.png'));
-            else drawList.push(game.add.sprite(result[i].y * tileHeight, result[i].x * tileWidth, '/pathFinish.png'));
-
-        }
-        player.bringToTop();
-    };
-
-    //empties the temp variable and flags movement as false, thus preventing the execution of other functions
-    function stopPath(sprite) {
-        isMoving = false;
-        temp = null;
-        sprite.body.velocity.x = 0;
-        sprite.body.velocity.y = 0;
-    };
 
     function findPathTo(tilex, tiley) {
         pathfinder.setCallbackFunction(function(path) {
             path = path || [];
 
             for (var i = 0, ilen = path.length; i < ilen; i++) {
+                game.physics.arcade.collide(player, layer);
                 //calculates the x and y coordinates towards which to move the ball
                 var x = path[i].x * tileWidth + tileWidth / 2;
                 var y = path[i].y * tileHeight + tileHeight / 2;
@@ -99852,12 +99823,8 @@ $(function() {
     }
 
     function update() {
-        //if movement flag is true, the ball continues to move
-        if (isMoving) {
-            traversePath(player);
-        }
-
         game.physics.arcade.collide(player, layer);
+        game.physics.arcade.moveToXY(player, x, y, 300);
 
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
@@ -99880,41 +99847,13 @@ $(function() {
             blocked = true;
             findPathTo(layer.getTileX(marker.x), layer.getTileY(marker.y));
         }
+    }
 
+    function contextMenu() {
+        console.log(123);
     }
 
     function render() {
 
-    }
-
-    function traversePath(sprite) {
-        //if this is the first time calling this function for the current path or one tile has already been traversed,
-        //gets the coordinates of the next tile with result.shift() as in a FIFO structure
-        //if the result array has been emptied, stops the pathwalking
-        if (!temp || game.physics.arcade.distanceToXY(sprite, x, y) <= 4) {
-            if (!result.length) {
-                stopPath(sprite);
-                erasePath();
-                return;
-            } else {
-                temp = result.shift();
-
-                //calculates the x and y coordinates towards which to move the ball
-                x = temp.y * tileWidth + tileWidth / 2;
-                y = temp.x * tileHeight + tileHeight / 2;
-            }
-        }
-        //moves the ball
-        //the ball DOES NOT stop moving once it has reached its goal, hence the distanceToXY()<=4 above
-        //moveToXY(object to move, where to move X, where to move Y, speed);
-        game.physics.arcade.moveToXY(sprite, x, y, 300);
-    }
-
-    //destroys path visuals
-    function erasePath() {
-        for (var i = 0; i < drawList.length; i++) {
-            drawList[i].destroy();
-        }
-        list = null;
     }
 });
