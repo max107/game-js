@@ -44,8 +44,8 @@ $(function() {
         pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
         pathfinder.setGrid(map.layers[0].data, walkables);
 
-        player = game.add.sprite(450, 80, 'car');
-        player.anchor.setTo(0, 0);
+        player = game.add.sprite(450, 128, 'car');
+        // player.anchor.setTo(0.5, 0.5);
 
         game.physics.enable(player);
         game.camera.follow(player);
@@ -63,6 +63,9 @@ $(function() {
     }
 
     function update() {
+        marker.x = layer.getTileX(game.input.activePointer.worldX) * 32;
+        marker.y = layer.getTileY(game.input.activePointer.worldY) * 32;
+
         game.physics.arcade.collide(player, layer);
 
         if (tween && tween.isRunning) {
@@ -73,9 +76,6 @@ $(function() {
             if (Phaser.Rectangle.contains(player.body, game.input.x, game.input.y)) {
                 player.body.velocity.setTo(0, 0);
             } else {
-                marker.x = layer.getTileX(game.input.activePointer.worldX) * 32;
-                marker.y = layer.getTileY(game.input.activePointer.worldY) * 32;
-
                 pathfinder.setCallbackFunction(function(path) {
                     path = path || [];
 
@@ -83,43 +83,47 @@ $(function() {
                     var duration = 100;
 
                     movePlayer = game.add.tween(player);
+                    scalePlayer = game.add.tween(player.scale);
+                    rotatePlayer = game.add.tween(player.anchor);
 
-                    var angle = 0;
                     for (var i = 0, ilen = path.length; i < ilen; i++) {
                         map.putTile(i + 1 == ilen ? 50 : 49, path[i].x, path[i].y);
 
-                        /*
-                        if (layer.getTileX(player.x) < path[i].x) {
-                            player.rotation = 0;
-                            player.anchor.setTo(0, 0);
-                        } else if (layer.getTileX(player.x) > path[i].x) {
-                            player.rotation = -3.1;
-                            player.anchor.setTo(1, 1);
-                        }
+                        var targetAngle = game.math.angleBetween(
+                            player.x, player.y,
+                            path[i].x * 32, path[i].y * 32
+                        );
 
-                        if (layer.getTileX(player.y) < path[i].y) {
-                            player.rotation = -4.7;
-                            player.anchor.setTo(0, 1);
-                        } else if (layer.getTileY(player.y) > path[i].y) {
-                            player.rotation = 4.7;
-                            player.anchor.setTo(1, 0);
-                        }
-                        */
+                        // scalePlayer.to({
+                        //     x: -1
+                        // }, 1, Phaser.Easing.Linear.None);
 
-                        if (layer.getTileX(player.x) < path[i].x) {
-                            angle = 0;
-                        } else if (layer.getTileX(player.x) > path[i].x) {
-                            angle -= 360;
-                        }
+                        // var angleX = 0,
+                        //     angleY = 0;
+                        // if (targetAngle < 0) {
+                        //     angleX = 1;
+                        //     angleY = 0;
+                        // } else if (targetAngle > 3) {
+                        //     angleX = 1;
+                        //     angleY = 1;
+                        // } else if (targetAngle > 1) {
+                        //     angleX = 0;
+                        //     angleY = 1;
+                        // }
 
-                        if (layer.getTileX(player.y) < path[i].y) {
-                            angle += 360;
-                        } else if (layer.getTileY(player.y) > path[i].y) {
-                            angle += 180;
-                        }
+                        // rotatePlayer.to({
+                        //     x: angleX,
+                        //     y: angleY
+                        // }, duration, Phaser.Easing.Linear.None);
+                        
+                        // movePlayer.chain(scalePlayer.to({
+                        //     x: -1
+                        // }, 1, Phaser.Easing.Linear.None).chain(rotatePlayer.to({
+                        //     y: 0
+                        // }, 1, Phaser.Easing.Linear.None)));
 
                         movePlayer.to({
-                            angle: angle,
+                            // rotation: targetAngle,
                             x: path[i].x * 32,
                             y: path[i].y * 32
                         }, duration, Phaser.Easing.Linear.None);
